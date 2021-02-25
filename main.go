@@ -8,13 +8,15 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // Struct for login
 type Login struct {
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-	Token    string `json:"Token"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 // In the future, this would not be here.  Instead, you would search a database (dynamodb?) by username and return the password
@@ -26,13 +28,31 @@ func getPassword() Login {
 	return login
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	setupResponse(&w, r)
+// example from asanchez.dev/blob/cors-golang-options
+func CORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// set headers
+		(w).Header().Set("Access-Control-Allow-Origin", "*")
+		(w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		(w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-	// if r.Method != http.MethodPost {
-	// 	w.WriteHeader(405) // not allowed
-	// 	return
-	// }
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		fmt.Println("ok")
+
+		next.ServeHTTP(w, r)
+		return
+	})
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(400) // bad request
+		return
+	}
 
 	// get the body of the POST request
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -76,12 +96,14 @@ func getToken() string {
 func validateCreds(login Login) (bool, error) {
 	// get expected username/password
 	expectedLogin := getPassword()
+	//// these are helpful for troubleshooting
+	// fmt.Printf("expected: %+v\n", expectedLogin)
+	// fmt.Printf("actual: %+v\n", login)
 	if expectedLogin == login {
 		return true, nil
 	} else {
 		return false, errors.New("Invalid username or password")
 	}
-	// json.NewEncoder(w).Encode(login)
 }
 
 func setupResponse(w *http.ResponseWriter, req *http.Request) {
@@ -92,6 +114,10 @@ func setupResponse(w *http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/login", loginHandler)
+	r := mux.NewRouter()
+	r.Use(CORS) // handles OPTIONS which is the preflight
+	r.HandleFunc("/login", loginHandler)
+
+	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":10000", nil))
 }
