@@ -13,9 +13,9 @@ Read more about this project [here](https://www.techtrek.io/getting-started-with
 - Using postman (or equivalent), hit the local url `http://localhost:10000` with the following body: 
 ```json
 {
-    "username": {{username}},
-    "password": {{password}},
-    "token": {{token}}
+    "username": {username},
+    "password": {password},
+    "token": {token}
 }
 ```
 
@@ -28,9 +28,9 @@ Call the api with the following body:
 
 ```json
 {
-    "username": {{username}},
-    "password": {{password}},
-    "token": {{token}}
+    "username": {username},
+    "password": {password},
+    "token": {token}
 }
 ```
 
