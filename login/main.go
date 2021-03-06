@@ -90,7 +90,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func getToken() string {
 	loc, _ := time.LoadLocation("America/New_York")
 	currentTime := time.Now().In(loc)
-	return fmt.Sprintf("%d%d", currentTime.Hour(), currentTime.Minute())
+	return fmt.Sprintf("%d%02d", currentTime.Hour(), currentTime.Minute())
 }
 
 func validateCreds(login Login) (bool, error) {
