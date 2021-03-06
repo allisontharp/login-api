@@ -90,15 +90,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 // Get the 2 digit hour (24 hour time) and 2 digit minute at time of submission
 func getToken() string {
 	currentTime := time.Now()
-	return fmt.Sprintf("%d%d", currentTime.Hour(), currentTime.Minute())
+	return fmt.Sprintf("%d%02d", currentTime.Hour(), currentTime.Minute())
 }
 
 func validateCreds(login Login) (bool, error) {
 	// get expected username/password
 	expectedLogin := getPassword()
 	//// these are helpful for troubleshooting
-	// fmt.Printf("expected: %+v\n", expectedLogin)
-	// fmt.Printf("actual: %+v\n", login)
+	fmt.Printf("expected: %+v\n", expectedLogin)
+	fmt.Printf("actual: %+v\n", login)
 	if expectedLogin == login {
 		return true, nil
 	} else {
